@@ -20,7 +20,21 @@ def pull_git(giturl,gitbranch):
     print('=================   wait for minutes,pulling...===================')
     repo_url = giturl
     repo_dir = PATH+"/"+gitbranch
-    git.Repo.clone_from(repo_url,repo_dir,branch=gitbranch)
+
+    """If the clone fails, clone again;If the pull fails, pull again,
+        sometimes it may fail due to network connectivity reasons
+        if .git exists,then pull the repo;otherwise clone the repo
+        """
+    try:
+        if os.path.exists(repo_dir):
+            print('.git exists,pull')
+            repo=git.Repo(repo_dir)
+            repo.remotes.origin.pull(gitbranch)
+        else:
+            print('.git no exists,clone')
+            git.Repo.clone_from(repo_url,repo_dir,branch=gitbranch)    
+    except:
+        pull_git(gitbranch)
     print('=================Completed!!!===================')
 
 if __name__ == "__main__" :
